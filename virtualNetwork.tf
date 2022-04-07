@@ -40,8 +40,20 @@ resource "azurerm_network_security_group" "nsg_atividade" {
   resource_group_name = azurerm_resource_group.rg_atividade.name
 
   security_rule {
-    name                       = "sshFirewall"
-    priority                   = 100
+    name                       = "SSH"
+    priority                   = 1001
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "web"
+    priority                   = 1003
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
@@ -71,6 +83,11 @@ resource "azurerm_network_interface" "nic_atividade" {
   }
 }
 
+data "azurerm_public_ip" "ip_atividade"{
+    name = azurerm_public_ip.pip_atividade.name
+    resource_group_name = azurerm_resource_group.rg_atividade.name
+}
+
 
 # Associação/Amarração do NIC com o NSG
 resource "azurerm_network_interface_security_group_association" "nic_nsg_assoc_atividade" {
@@ -87,3 +104,14 @@ resource "azurerm_storage_account" "saAtividade" {
     account_tier                = "Standard"
     account_replication_type    = "GRS"
 }
+
+# resource "tls_private_key" "vm_ssh" {
+#     algorithm = "RSA"
+#     rsa_bits = 4096
+# }
+
+# resource "local_file" "private_key" {
+#   content         = tls_private_key.vm_ssh.private_key_pem
+#   filename        = "key.pem"
+#   file_permission = "0600"
+# }

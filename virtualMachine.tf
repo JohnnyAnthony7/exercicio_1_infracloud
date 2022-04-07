@@ -20,9 +20,10 @@ resource "azurerm_linux_virtual_machine" "vm_atividade" {
     }
 
     computer_name  = "killyVM"
-    admin_username = "TioKilly"
+    admin_username = "killyADM"
     admin_password = "3ss4eaS3nh@"
     disable_password_authentication = false
+
     
 
     boot_diagnostics {
@@ -32,3 +33,22 @@ resource "azurerm_linux_virtual_machine" "vm_atividade" {
     depends_on = [ azurerm_resource_group.rg_atividade ]
 }
 
+resource "null_resource" "apache_atividade" {
+  connection {
+    type = "ssh"
+    host = data.azurerm_public_ip.ip_atividade.ip_address
+    user = "killyADM"
+    password = "3ss4eaS3nh@"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt update",
+      "sudo apt install -y apache2",
+    ]
+  }
+
+  depends_on = [
+    azurerm_linux_virtual_machine.vm_atividade
+  ]
+}
